@@ -30,7 +30,17 @@ export interface Document {
     lastModified?: Date;
     version?: string;
     status?: string;
+    documentId?: string;
+    priority?: string;
+    expiresAt?: Date;
+    parentId?: ObjectId;
+    [key: string]: any; // Allow arbitrary additional fields
   };
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  lastAccessed?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 } 
