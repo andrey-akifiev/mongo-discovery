@@ -69,6 +69,13 @@ export class TestDataFactory {
         version: '1.0',
         status: 'draft'
       },
+      location: {
+        type: 'Point',
+        coordinates: [
+          Math.random() * 360 - 180, // longitude between -180 and 180
+          Math.random() * 180 - 90   // latitude between -90 and 90
+        ]
+      },
       createdAt,
       updatedAt: this.generateDate(createdAt) // updatedAt should be after createdAt
     };
