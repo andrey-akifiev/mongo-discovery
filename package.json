@@ -1,0 +1,31 @@
+{
+  "name": "mongo-discovery",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "migrate": "ts-node migrations/migrate.ts",
+    "migrate:watch": "ts-node migrations/run-migration.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.10.2",
+    "@types/mongodb": "^4.0.7",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^20.11.24",
+    "@types/realm": "^3.5.0",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.2.0",
+    "realm": "^12.6.0",
+    "reflect-metadata": "^0.2.1",
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
