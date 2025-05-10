@@ -1,43 +1,18 @@
-import { test, expect } from '@playwright/test';
-import { MongoClient, ObjectId } from 'mongodb';
-import { User, Folder, Document } from './interfaces';
-import { TestDataFactory } from './test-data-factory';
+import { test, expect } from './base-test';
+import { ObjectId } from 'mongodb';
+import { TestDataFactory } from '../../test-data-factory';
 
 test.describe('MongoDB Document Operations', () => {
-  let client: MongoClient;
-  let documentsCollection: any;
-  let usersCollection: any;
-  let foldersCollection: any;
-  let testUserId: ObjectId;
-  let testFolderId: ObjectId;
-
-  test.beforeAll(async () => {
-    // Connect to MongoDB with authentication
-    client = new MongoClient('mongodb://root:example@localhost:27017/test?authSource=admin');
-    await client.connect();
-    
-    documentsCollection = client.db('test').collection<Document>('documents');
-    usersCollection = client.db('test').collection<User>('users');
-    foldersCollection = client.db('test').collection<Folder>('folders');
-
-    // Create test user and folder for document operations
+  test('should create a new document', async ({ documentsCollection, usersCollection, foldersCollection }) => {
+    // ARRANGE: Create test user and folder
     const userData = TestDataFactory.createUser();
     const userResult = await usersCollection.insertOne(userData);
-    testUserId = userResult.insertedId;
+    const testUserId = userResult.insertedId;
 
     const folderData = TestDataFactory.createFolder(testUserId);
     const folderResult = await foldersCollection.insertOne(folderData);
-    testFolderId = folderResult.insertedId;
-  });
+    const testFolderId = folderResult.insertedId;
 
-  test.afterAll(async () => {
-    // Clean up test data
-    await usersCollection.deleteOne({ _id: testUserId });
-    await foldersCollection.deleteOne({ _id: testFolderId });
-    await client.close();
-  });
-
-  test('should create a new document', async () => {
     const documentData = TestDataFactory.createDocument(testUserId, testFolderId, {
       tags: ['test', 'important'],
       metadata: {
@@ -49,26 +24,49 @@ test.describe('MongoDB Document Operations', () => {
       }
     });
 
+    // ACT: Insert the document
     const result = await documentsCollection.insertOne(documentData);
+
+    // ASSERT: Verify the insertion
     expect(result.acknowledged).toBe(true);
     expect(result.insertedId).toBeDefined();
   });
 
-  test('should find documents by tags', async () => {
-    // First create a document with specific tags
+  test('should find documents by tags', async ({ documentsCollection, usersCollection, foldersCollection }) => {
+    // ARRANGE: Create test user and folder
+    const userData = TestDataFactory.createUser();
+    const userResult = await usersCollection.insertOne(userData);
+    const testUserId = userResult.insertedId;
+
+    const folderData = TestDataFactory.createFolder(testUserId);
+    const folderResult = await foldersCollection.insertOne(folderData);
+    const testFolderId = folderResult.insertedId;
+
+    // Create a document with specific tags
     const documentData = TestDataFactory.createDocument(testUserId, testFolderId, {
       tags: ['urgent', 'confidential']
     });
     await documentsCollection.insertOne(documentData);
 
-    // Find documents with the 'urgent' tag
+    // ACT: Find documents with the 'urgent' tag
     const foundDocuments = await documentsCollection.find({ tags: 'urgent' }).toArray();
+
+    // ASSERT: Verify the search results
     expect(foundDocuments.length).toBeGreaterThan(0);
     expect(foundDocuments[0].tags).toContain('urgent');
   });
 
-  test('should update document metadata', async () => {
-    // First create a document
+  test('should update document metadata', async ({ documentsCollection, usersCollection, foldersCollection }) => {
+    // ARRANGE: Create test user and folder
+    const userData = TestDataFactory.createUser();
+    const userResult = await usersCollection.insertOne(userData);
+    const testUserId = userResult.insertedId;
+
+    const folderData = TestDataFactory.createFolder(testUserId);
+    const folderResult = await foldersCollection.insertOne(folderData);
+    const testFolderId = folderResult.insertedId;
+
+    // Create a document with initial metadata
     const documentData = TestDataFactory.createDocument(testUserId, testFolderId, {
       metadata: {
         status: 'draft',
@@ -77,7 +75,7 @@ test.describe('MongoDB Document Operations', () => {
     });
     const insertResult = await documentsCollection.insertOne(documentData);
 
-    // Update the document's metadata
+    // ACT: Update the document's metadata
     const updateResult = await documentsCollection.updateOne(
       { _id: insertResult.insertedId },
       { 
@@ -89,26 +87,38 @@ test.describe('MongoDB Document Operations', () => {
       }
     );
 
+    // ASSERT: Verify the update operation
     expect(updateResult.acknowledged).toBe(true);
     expect(updateResult.modifiedCount).toBe(1);
 
-    // Verify the update
+    // ASSERT: Verify the updated document
     const updatedDoc = await documentsCollection.findOne({ _id: insertResult.insertedId });
-    expect(updatedDoc.metadata.status).toBe('review');
-    expect(updatedDoc.metadata.version).toBe('1.1');
+    expect(updatedDoc?.metadata?.status).toBe('review');
+    expect(updatedDoc?.metadata?.version).toBe('1.1');
   });
 
-  test('should delete a document', async () => {
-    // First create a document
+  test('should delete a document', async ({ documentsCollection, usersCollection, foldersCollection }) => {
+    // ARRANGE: Create test user and folder
+    const userData = TestDataFactory.createUser();
+    const userResult = await usersCollection.insertOne(userData);
+    const testUserId = userResult.insertedId;
+
+    const folderData = TestDataFactory.createFolder(testUserId);
+    const folderResult = await foldersCollection.insertOne(folderData);
+    const testFolderId = folderResult.insertedId;
+
+    // Create a document to delete
     const documentData = TestDataFactory.createDocument(testUserId, testFolderId);
     const insertResult = await documentsCollection.insertOne(documentData);
 
-    // Delete the document
+    // ACT: Delete the document
     const deleteResult = await documentsCollection.deleteOne({ _id: insertResult.insertedId });
+
+    // ASSERT: Verify the deletion operation
     expect(deleteResult.acknowledged).toBe(true);
     expect(deleteResult.deletedCount).toBe(1);
 
-    // Verify the deletion
+    // ASSERT: Verify the document no longer exists
     const deletedDoc = await documentsCollection.findOne({ _id: insertResult.insertedId });
     expect(deletedDoc).toBeNull();
   });

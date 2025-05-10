@@ -11,6 +11,6 @@
     "emitDecoratorMetadata": true,
     "outDir": "./dist"
   },
-  "include": ["tests/**/*"],
+  "include": ["tests/**/*", "interfaces.ts", "test-data-factory.ts"],
   "exclude": ["node_modules"]
 } 
