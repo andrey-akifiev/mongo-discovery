@@ -1,0 +1,16 @@
+{
+  "type": "mongodb",
+  "host": "localhost",
+  "port": 27017,
+  "database": "test",
+  "username": "root",
+  "password": "example",
+  "entities": ["tests/typeorm/entities/*.js"],
+  "synchronize": false,
+  "logging": true,
+  "authSource": "admin",
+  "extra": {
+    "retryWrites": true,
+    "w": "majority"
+  }
+} 

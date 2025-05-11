@@ -10,13 +10,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "outDir": "./dist",
-    "resolveJsonModule": true,
-    "strictPropertyInitialization": false,
-    "moduleResolution": "node"
+    "rootDir": "./src",
+    "moduleResolution": "node",
+    "resolveJsonModule": true
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*"
-  ],
+  "include": ["src/**/*", "../ormconfig.json"],
   "exclude": ["node_modules"]
 } 
