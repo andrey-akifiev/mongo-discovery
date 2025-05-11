@@ -1,0 +1,50 @@
+datasource db {
+  provider = "mongodb"
+  url      = "mongodb://root:example@localhost:27017/test?authSource=admin"
+  directUrl = "mongodb://root:example@localhost:27017/test?authSource=admin"
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String     @unique
+  age       Int
+  active    Boolean    @default(true)
+  createdAt DateTime
+  updatedAt DateTime
+  folders   Folder[]
+  documents Document[]
+}
+
+model Folder {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  ownerId   String     @db.ObjectId
+  parentId  String?    @db.ObjectId
+  path      String
+  createdAt DateTime
+  updatedAt DateTime
+  owner     User       @relation(fields: [ownerId], references: [id])
+  documents Document[]
+}
+
+model Document {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  content     String?
+  ownerId     String   @db.ObjectId
+  folderId    String   @db.ObjectId
+  tags        String[]
+  metadata    Json
+  location    Json
+  lastAccessed DateTime?
+  createdAt   DateTime
+  updatedAt   DateTime
+  owner       User     @relation(fields: [ownerId], references: [id])
+  folder      Folder   @relation(fields: [folderId], references: [id])
+} 
